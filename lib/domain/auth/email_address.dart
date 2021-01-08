@@ -2,31 +2,17 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:notes_DDD/domain/core/value_objects.dart';
 
 part 'email_address.freezed.dart';
 
-class EmailAddress {
+class EmailAddress extends ValueObject<String> {
   final Either<ValueFailure<String>, String> value;
-
   factory EmailAddress(String input) {
     assert(input != null);
     return EmailAddress._(validateEmailAddress(input));
   }
-
   const EmailAddress._(this.value);
-
-  @override
-  String toString() => 'EmailAddress(value: $value)';
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is EmailAddress && o.value == value;
-  }
-
-  @override
-  int get hashCode => value.hashCode;
 }
 
 Either<ValueFailure<String>, String> validateEmailAddress(String input) {
