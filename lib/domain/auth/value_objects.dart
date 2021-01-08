@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:notes_DDD/domain/core/value_objects.dart';
 
-part 'email_address.freezed.dart';
+part 'value_objects.freezed.dart';
 
 class EmailAddress extends ValueObject<String> {
   final Either<ValueFailure<String>, String> value;
