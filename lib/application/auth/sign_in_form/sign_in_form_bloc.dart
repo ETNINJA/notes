@@ -17,7 +17,7 @@ part 'sign_in_form_bloc.freezed.dart';
 class SignInFormBloc extends Bloc<SignInFormEvent, SignInFormState> {
   final IAuthFacade _authFacade;
 
-  SignInFormBloc(this._authFacade) : super(null);
+  SignInFormBloc(this._authFacade) : super(SignInFormState.initial());
 
   @override
   SignInFormState get initialState => SignInFormState.initial();
@@ -26,6 +26,13 @@ class SignInFormBloc extends Bloc<SignInFormEvent, SignInFormState> {
   Stream<SignInFormState> mapEventToState(
     SignInFormEvent event,
   ) async* {
-    // TODO: Implement
+    yield* event.map(
+      started: (e) async* {},
+      emailChanged: (e) async* {},
+      passwordChanged: (e) async* {},
+      registerWithEmailAndPasswordPressed: (e) async* {},
+      signInWithEmailAndPasswordPressed: (e) async* {},
+      signInWithGooglePressed: (e) async* {},
+    );
   }
 }
