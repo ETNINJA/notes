@@ -15,6 +15,8 @@ abstract class ValueObject<T> {
     return o is ValueObject<T> && o.value == value;
   }
 
+  bool isValid() => value.isRight();
+
   @override
   int get hashCode => value.hashCode;
 
