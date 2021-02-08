@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:notes_DDD/domain/auth/auth_failure.dart';
@@ -20,29 +21,66 @@ class FirebaseAuthFacade implements IAuthFacade {
   Future<Either<AuthFailure, Unit>> registerWithEmailAndPassword({
     @required EmailAddress emailAddress,
     @required Password password,
-  }) {
-    final emailAddressStr = emailAddress.value.getOrElse(() => 'FAILURE');
-    final passwordStr = password.value.getOrElse(() => 'FAILURE');
-
-    _firebaseAuth.createUserWithEmailAndPassword(
-      email: emailAddressStr,
-      password: passwordStr,
-    );
-    throw UnimplementedError();
+  }) async {
+    final emailAddressStr = emailAddress.getOrCrash();
+    final passwordStr = password.getOrCrash();
+    try {
+      await _firebaseAuth.createUserWithEmailAndPassword(
+        email: emailAddressStr,
+        password: passwordStr,
+      );
+      return right(unit);
+    } on PlatformException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        return left(const AuthFailure.emailAlreadyInUse());
+      } else {
+        return left(const AuthFailure.serverError());
+      }
+    }
   }
 
   @override
   Future<Either<AuthFailure, Unit>> signInWithEmailAndPassword({
     @required EmailAddress emailAddress,
     @required Password password,
-  }) {
-    // TODO: implement signInWithEmailAndPassword
-    throw UnimplementedError();
+  }) async {
+    final emailAddressStr = emailAddress.getOrCrash();
+    final passwordStr = password.getOrCrash();
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(
+        email: emailAddressStr,
+        password: passwordStr,
+      );
+      return right(unit);
+    } on PlatformException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        return left(const AuthFailure.invalidEmailAndPasswordCombination());
+      } else {
+        return left(const AuthFailure.serverError());
+      }
+    }
   }
 
   @override
-  Future<Either<AuthFailure, Unit>> signInWithGoogle() {
-    // TODO: implement signInWithGoogle
-    throw UnimplementedError();
+  Future<Either<AuthFailure, Unit>> signInWithGoogle() async {
+    try {
+      final googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        return left(AuthFailure.cancelledByUser());
+      }
+      final googleAuthentication = await googleUser.authentication;
+      final authCredencial = GoogleAuthProvider.credential(
+        idToken: googleAuthentication.idToken,
+        accessToken: googleAuthentication.accessToken,
+      );
+      return _firebaseAuth.signInWithCredential(authCredencial).then(
+            (r) => right(unit),
+          );
+    } on PlatformException catch (_) {
+      return left(
+        const AuthFailure.serverError(),
+      );
+    }
   }
 }

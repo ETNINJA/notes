@@ -10,9 +10,10 @@ abstract class ValueObject<T> {
   Either<ValueFailure<T>, T> get value;
 
   //helper method for firbaseAuthFacade
+  /// Throws [UnexpectedValureError] containing [ValueFailure]
   T getOrCrash() {
-    return value.fold(
-        (f) => throw UnexpectedValureError(valueFailure: f), (r) => r);
+    return value.fold((f) => throw UnexpectedValureError(valueFailure: f), id);
+    //(f) => throw UnexpectedValureError(valueFailure: f), (r) => r);
   }
 
   @override
